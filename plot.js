@@ -27,7 +27,7 @@ window.onload = function () {
         .attr('width', msm.width)
         .attr('height', msm.height);
     // d3.csv is basically fetch but it can be be passed a csv file as a parameter
-    d3.csv("gapminder.csv")
+    d3.csv("./data/gapminder.csv")
         .then((d) => makeScatterPlot(d))
 }
 
@@ -53,21 +53,21 @@ function makeScatterPlot(csvData) {
     plotData(mapFunctions);
 
     // draw title and axes labels
-    makeLabels(svgContainer, msm, "Countries by Life Expectancy and Fertility Rate",'Fertility Rates (Avg Children per Woman)','Life Expectancy (years)');
+    makeLabels(svgContainer, msm, "Countries by Life Expectancy and Fertility Rate", 'Fertility Rates (Avg Children per Woman)', 'Life Expectancy (years)');
 
-    let distinctYears = [...new Set(data.map(d => d.year))];
+    let distinctYears = ["1980"];
     let defaultYear = 2015;
 
     let options = dropDown.selectAll("option")
-           .data(distinctYears)
-           .enter()
-           .append("option")
-           .text(function (d) { return d; })
-           .attr("value", function (d) { return d; })
-           .attr("selected", function(d){ return d == defaultYear; })
+       .data(distinctYears)
+       .enter()
+       .append("option")
+       .text(function (d) { return d; })
+       .attr("value", function (d) { return d; })
+       .attr("selected", function(d){ return d == defaultYear; })
            
     showCircles(dropDown.node());//this will filter initially
-    dropDown.on("change", function() {
+    dropDown.on("change", function () {
         showCircles(this)
     });
 }
@@ -79,12 +79,12 @@ function showCircles(me) {
 
     svgContainer.selectAll(".circles")
         .data(data)
-        .filter(function(d) {return selected != d.year;})
+        .filter(function (d) { return selected != d.year; })
         .attr("display", displayOthers);
         
     svgContainer.selectAll(".circles")
         .data(data)
-        .filter(function(d) {return selected == d.year;})
+        .filter(function (d) { return selected == d.year; })
         .attr("display", display);
 }
 
@@ -93,18 +93,18 @@ function makeLabels(svgContainer, msm, title, x, y) {
     svgContainer.append('text')
         .attr('x', (msm.width - 2 * msm.marginAll) / 2 - 90)
         .attr('y', msm.marginAll / 2 + 10)
-        .style('font-size', '10pt')
+        .style('font-size', '20pt')
         .text(title);
 
     svgContainer.append('text')
         .attr('x', (msm.width - 2 * msm.marginAll) / 2 - 30)
         .attr('y', msm.height - 10)
-        .style('font-size', '10pt')
+        .style('font-size', '18pt')
         .text(x);
 
     svgContainer.append('text')
         .attr('transform', 'translate( 15,' + (msm.height / 2 + 30) + ') rotate(-90)')
-        .style('font-size', '10pt')
+        .style('font-size', '18pt')
         .text(y);
 }
 
@@ -156,10 +156,10 @@ function plotData(map) {
                 .style("opacity", .9);
             plotPopulation(d.country, toolChart)
             div//.html("Fertility:       " + d.fertility + "<br/>" +
-                    // "Life Expectancy: " + d.life_expectancy + "<br/>" +
-                    // "Population:      " + numberWithCommas(d["population"]) + "<br/>" +
-                    // "Year:            " + d.year + "<br/>" +
-                    // "Country:         " + d.country)
+                // "Life Expectancy: " + d.life_expectancy + "<br/>" +
+                // "Population:      " + numberWithCommas(d["population"]) + "<br/>" +
+                // "Year:            " + d.year + "<br/>" +
+                // "Country:         " + d.country)
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             
@@ -172,8 +172,8 @@ function plotData(map) {
 }
 
 function plotPopulation(country, toolChart) {
-    let countryData = data.filter((row) => {return row.country == country})
-    let population = countryData.map((row) => parseInt(row["population"]));
+    let countryData = data.filter((row) => { return row.country == country })
+    let population = countryData.map((row) => parseInt(row["population"] / 1000000));
     let year = countryData.map((row) => parseInt(row["year"]));
 
     let axesLimits = findMinMax(year, population);
@@ -184,9 +184,25 @@ function plotPopulation(country, toolChart) {
         .attr("stroke", "steelblue")
         .attr("stroke-width", 1.5)
         .attr("d", d3.line()
-                    .x(function(d) { return mapFunctions.xScale(d.year) })
-                    .y(function(d) { return mapFunctions.yScale(d.population) }))
-    makeLabels(toolChart, small_msm, "Population Over Time For " + country, "Year", "Population (in Millions)");
+            .x(function (d) { return mapFunctions.xScale(d.year) })
+            .y(function (d) { return mapFunctions.yScale(d.population / 1000000) }))
+
+    toolChart.append('text')
+        .attr('x', (small_msm.width - 2 * small_msm.marginAll) / 2 - 150)
+        .attr('y', small_msm.marginAll / 2 + 10)
+        .style('font-size', '15pt')
+        .text("Population Over Time For " + country);
+
+    toolChart.append('text')
+        .attr('x', (small_msm.width - 2 * small_msm.marginAll) / 2 + 50)
+        .attr('y', small_msm.height - 10)
+        .style('font-size', '10pt')
+        .text("Year");
+
+    toolChart.append('text')
+        .attr('transform', 'translate( 15,' + (small_msm.height / 2 + 50) + ') rotate(-90)')
+        .style('font-size', '10pt')
+        .text("Population (in Millions)");
 }
 
 // draw the axes and ticks
